@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Churn Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <h2>Customer Churn Prediction</h2>
+
+    <form method="post">
+        <div class="form-row">
+            <label>Senior Citizen</label>
+            <div class="field-wrap">
+                {% if field_options.SeniorCitizen %}
+                    <select name="SeniorCitizen" required>
+                        <option value="" disabled {% if not form_values or form_values.SeniorCitizen == '' %}selected{% endif %}>Select...</option>
+                        {% for val,label in field_options.SeniorCitizen %}
+                            <option value="{{ val }}" {% if form_values and form_values.SeniorCitizen == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                {% else %}
+                    <input name="SeniorCitizen" placeholder="Senior Citizen (0/1)" required>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-row">
+            <label>Tenure (Months)</label>
+            <div class="field-wrap">
+                <input name="tenure" placeholder="Tenure (Months)" value="{{ form_values.tenure if form_values else '' }}" required>
+            </div>
+        </div>
+
+        {% for field in ['InternetService','OnlineSecurity','TechSupport','Contract','PaperlessBilling','PaymentMethod'] %}
+            <div class="form-row">
+                <label>{{ field.replace('_', ' ') }}</label>
+                <div class="field-wrap">
+                    {% if field in field_options %}
+                        <select name="{{ field }}" required>
+                            <option value="" disabled {% if not form_values or form_values[field] == '' %}selected{% endif %}>Select...</option>
+                            {% for val,label in field_options[field] %}
+                                <option value="{{ val }}" {% if form_values and form_values[field] == val %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    {% else %}
+                        <input name="{{ field }}" placeholder="{{ field }}" value="{{ form_values[field] if form_values else '' }}" required>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+
+        <div class="form-row">
+            <label>Monthly Charges</label>
+            <div class="field-wrap">
+                <input name="MonthlyCharges" placeholder="Monthly Charges" value="{{ form_values.MonthlyCharges if form_values else '' }}" required>
+            </div>
+        </div>
+
+        <div class="form-row buttons">
+            <button type="submit">Predict Churn</button>
+        </div>
+    </form>
+
+    {% if prediction %}
+        <div class="result {{ churn_class }}">
+            {{ prediction }}
+        </div>
+    {% endif %}
+
+    <!-- {% if error %}
+        <div class="result yes">
+            {{ error }}
+        </div>
+    {% endif %} -->
+
+    {% if single_error %}
+        <div class="result error">
+            {{ single_error }}
+        </div>
+    {% endif %}
+
+    {% if bulk_error %}
+        <div class="result error">
+            {{ bulk_error }}
+        </div>
+    {% endif %}
+
+
+    <hr>
+
+    <div class="upload-section">
+        <h3>Bulk Excel Prediction</h3>
+        <form action="/bulk_predict" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" required>
+            <button type="submit">Upload & Predict</button>
+        </form>
+
+        <br>
+        <a href="/download_template">Download Excel Template</a>
+    </div>
+</div>
+
+</body>
+</html>
